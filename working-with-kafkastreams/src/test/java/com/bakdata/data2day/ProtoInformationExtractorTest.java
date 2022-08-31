@@ -49,7 +49,8 @@ class ProtoInformationExtractorTest {
     private static ProtoInformationExtractor createExtractionApp() {
         final ProtoInformationExtractor app = new ProtoInformationExtractor();
         app.setInputTopics(List.of(INPUT));
-        app.setExtraOutputTopics(Map.of("protobuf-corporate", "protobuf-corporate", "protobuf-person", "protobuf-person"));
+        app.setExtraOutputTopics(
+            Map.of("protobuf-corporate", "protobuf-corporate", "protobuf-person", "protobuf-person"));
         return app;
     }
 
