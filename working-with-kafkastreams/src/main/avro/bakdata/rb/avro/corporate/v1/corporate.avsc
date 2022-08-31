@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "AvroCorporate",
+  "namespace": "com.bakdata.rb.avro.corporate.v1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "reference_id",
+      "type": ["null", "string"]
+    },
+    {
+      "name": "name",
+      "type": ["null", "string"]
+    },
+    {
+      "name": "street",
+      "type": ["null", "string"]
+    },
+    {
+      "name": "city",
+      "type": ["null", "string"]
+    }
+  ]
+}
