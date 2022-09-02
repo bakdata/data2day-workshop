@@ -9,23 +9,28 @@
     },
     {
       "name": "first_name",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "last_name",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "birthday",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "birth_location",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "corporate_id",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     }
   ]
 }

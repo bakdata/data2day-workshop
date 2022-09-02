@@ -1,8 +1,6 @@
 package com.bakdata.data2day;
 
-import static com.bakdata.data2day.Utils.extractCorporateInformation;
-import static com.bakdata.data2day.Utils.extractPersonInformation;
-
+import com.bakdata.data2day.extractor.JsonExtractor;
 import com.bakdata.data2day.model.CorporatePojo;
 import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
@@ -20,25 +18,30 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
             builder.stream(this.getInputTopics(), Consumed.with(Serdes.String(), Serdes.String()));
+        final JsonExtractor jsonExtractor = new JsonExtractor();
 
-        final String corporateTopic = this.getExtraOutputTopics().get(String.format("%s-corporate", "avro"));
+        final String corporateTopic = this.getOutputTopic("corporate");
+        input.mapValues(jsonExtractor::extractCorporate)
+            .selectKey((key, value) -> value.getId())
+            .mapValues(CorporatePojo::toAvro)
+            .to(corporateTopic);
 
-        extractCorporateInformation(input, corporateTopic, CorporatePojo::toAvro);
-
-        final String personTopic = this.getExtraOutputTopics().get(String.format("%s-person", "avro"));
-
-        extractPersonInformation(input, personTopic, PersonPojo::toAvro);
+        final String personTopic = this.getOutputTopic("person");
+        input.flatMapValues(jsonExtractor::extractPerson)
+            .selectKey((key, value) -> value.getId())
+            .mapValues(PersonPojo::toAvro)
+            .to(personTopic);
     }
 
     @Override
     public String getUniqueAppId() {
-        return "avro-corporate-information-extractor";
+        return String.format("avro-corporate-information-extractor-%s", this.getOutputTopic());
     }
 
     @Override
     protected Properties createKafkaProperties() {
         final Properties kafkaProperties = super.createKafkaProperties();
-        kafkaProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        kafkaProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         kafkaProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
 
         return kafkaProperties;

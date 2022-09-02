@@ -29,16 +29,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 class ProtoInformationExtractorTest {
 
-    public static final String INPUT = "announcement-html";
+    public static final String INPUT = "announcement-json";
     private final ProtoInformationExtractor app = createExtractionApp();
 
     @RegisterExtension
-    final TestTopologyExtension<Object, Object> testTopology = new TestTopologyExtension<>(
-        (props) -> {
-            this.app.setSchemaRegistryUrl(props.getProperty(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG));
-            return this.app.createTopology();
-        }, this.app.getKafkaProperties()
-    ).withSchemaRegistryMock(new SchemaRegistryMock(List.of(new ProtobufSchemaProvider())));
+    final TestTopologyExtension<Object, Object> testTopology =
+        new TestTopologyExtension<>(this.app::createTopology, this.app.getKafkaProperties())
+            .withSchemaRegistryMock(new SchemaRegistryMock(List.of(new ProtobufSchemaProvider())));
 
 
     @AfterEach
@@ -50,7 +47,7 @@ class ProtoInformationExtractorTest {
         final ProtoInformationExtractor app = new ProtoInformationExtractor();
         app.setInputTopics(List.of(INPUT));
         app.setExtraOutputTopics(
-            Map.of("protobuf-corporate", "protobuf-corporate", "protobuf-person", "protobuf-person"));
+            Map.of("corporate", "protobuf-corporate", "person", "protobuf-person"));
         return app;
     }
 
@@ -66,7 +63,7 @@ class ProtoInformationExtractorTest {
         final ProtoCorporate corporate = jsonExtractor.extractCorporate(fixture).toProto();
 
         final TestOutput<Object, Object> producerRecords =
-            this.testTopology.streamOutput(this.app.getOutputTopic("protobuf-corporate"));
+            this.testTopology.streamOutput(this.app.getOutputTopic("corporate"));
 
         assertThat(producerRecords.readOneRecord())
             .satisfies(record -> {
@@ -87,13 +84,13 @@ class ProtoInformationExtractorTest {
         final Serde<ProtoPerson> valueSerde = new KafkaProtobufSerde<>(ProtoPerson.class);
 
         valueSerde.configure(Map.of(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
-            this.app.getSchemaRegistryUrl()), false);
+            this.testTopology.getSchemaRegistryUrl()), false);
 
         this.testTopology.input()
             .withSerde(Serdes.String(), Serdes.String())
             .add("1", fixture);
 
-        this.testTopology.streamOutput(this.app.getOutputTopic("protobuf-person"))
+        this.testTopology.streamOutput(this.app.getOutputTopic("person"))
             .withSerde(Serdes.String(), valueSerde)
             .expectNextRecord()
             .hasKey(person.get(0).getId())

@@ -9,7 +9,6 @@ import com.bakdata.schemaregistrymock.SchemaRegistryMock;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider;
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -20,15 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 class AvroInformationExtractorTest {
-    public static final String INPUT = "announcement-html";
+    public static final String INPUT = "announcement-json";
     private final AvroInformationExtractor app = createExtractionApp();
     @RegisterExtension
-    final TestTopologyExtension<Object, Object> testTopology = new TestTopologyExtension<>(
-        (props) -> {
-            this.app.setSchemaRegistryUrl(props.getProperty(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG));
-            return this.app.createTopology();
-        }, this.app.getKafkaProperties()
-    ).withSchemaRegistryMock(new SchemaRegistryMock(List.of(new AvroSchemaProvider())));
+    final TestTopologyExtension<Object, Object> testTopology =
+        new TestTopologyExtension<>(this.app::createTopology, this.app.getKafkaProperties());
 
     @AfterEach
     void tearDown() {
@@ -38,7 +33,7 @@ class AvroInformationExtractorTest {
     private static AvroInformationExtractor createExtractionApp() {
         final AvroInformationExtractor app = new AvroInformationExtractor();
         app.setInputTopics(List.of(INPUT));
-        app.setExtraOutputTopics(Map.of("avro-corporate", "avro-corporate", "avro-person", "avro-person"));
+        app.setExtraOutputTopics(Map.of("corporate", "avro-corporate", "person", "avro-person"));
         return app;
     }
 
@@ -53,7 +48,7 @@ class AvroInformationExtractorTest {
         final JsonExtractor jsonExtractor = new JsonExtractor();
         final AvroCorporate corporate = jsonExtractor.extractCorporate(fixture).toAvro();
 
-        this.testTopology.streamOutput(this.app.getOutputTopic("avro-corporate"))
+        this.testTopology.streamOutput(this.app.getOutputTopic("corporate"))
             .expectNextRecord()
             .hasKey(corporate.getId())
             .hasValue(corporate)
@@ -72,7 +67,7 @@ class AvroInformationExtractorTest {
             .withSerde(Serdes.String(), Serdes.String())
             .add("1", fixture);
 
-        this.testTopology.streamOutput(this.app.getOutputTopic("avro-person"))
+        this.testTopology.streamOutput(this.app.getOutputTopic("person"))
             .expectNextRecord()
             .hasKey(person.get(0).getId())
             .hasValue(person.get(0))

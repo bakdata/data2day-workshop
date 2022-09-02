@@ -1,5 +1,6 @@
 package com.bakdata.data2day;
 
+import com.bakdata.data2day.extractor.JsonExtractor;
 import com.bakdata.data2day.model.CorporatePojo;
 import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
@@ -15,31 +16,38 @@ import org.apache.kafka.streams.kstream.KStream;
 @Setter
 public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
-    public static final String SCHEMA_NAME = "protobuf";
 
     @Override
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
             builder.stream(this.getInputTopics(), Consumed.with(Serdes.String(), Serdes.String()));
 
-        final String corporateTopic = this.getExtraOutputTopics().get(String.format("%s-corporate", SCHEMA_NAME));
+        final JsonExtractor jsonExtractor = new JsonExtractor();
 
-        Utils.extractCorporateInformation(input, corporateTopic, CorporatePojo::toProto);
+        final String corporateTopic = this.getOutputTopic("corporate");
 
-        final String personTopic = this.getExtraOutputTopics().get(String.format("%s-person", SCHEMA_NAME));
+        input.mapValues(jsonExtractor::extractCorporate)
+            .selectKey((key, value) -> value.getId())
+            .mapValues(CorporatePojo::toProto)
+            .to(corporateTopic);
 
-        Utils.extractPersonInformation(input, personTopic, PersonPojo::toProto);
+        final String personTopic = this.getOutputTopic("person");
+
+        input.flatMapValues(jsonExtractor::extractPerson)
+            .selectKey((key, value) -> value.getId())
+            .mapValues(PersonPojo::toProto)
+            .to(personTopic);
     }
 
     @Override
     public String getUniqueAppId() {
-        return "proto-corporate-information-extractor";
+        return String.format("proto-corporate-information-extractor-%s", this.getOutputTopic());
     }
 
     @Override
     protected Properties createKafkaProperties() {
         final Properties kafkaProperties = super.createKafkaProperties();
-        kafkaProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        kafkaProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         kafkaProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, KafkaProtobufSerde.class);
 
         return kafkaProperties;

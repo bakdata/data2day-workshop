@@ -9,19 +9,23 @@
     },
     {
       "name": "reference_id",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "name",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "street",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "city",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     }
   ]
 }
