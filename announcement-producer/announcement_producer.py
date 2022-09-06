@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 class AnnouncementProducer:
     BOOTSTRAP_SERVER: str = "localhost:29092"
-    TOPIC = "announcement"
+    TOPIC = "announcements"
 
     def __init__(self):
         producer_conf = {

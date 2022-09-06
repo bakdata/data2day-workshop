@@ -4,7 +4,9 @@ import os
 
 from announcement_producer import AnnouncementProducer
 
-DUMP_FILE = "corporate-events-dump.json"
+ENCODING = "UTF-8"
+
+DUMP_FILE = "corporate-events-dump"
 
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO"),
@@ -14,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    with open(DUMP_FILE, "r", encoding="UTF-8") as file:
+    with open(DUMP_FILE, "r", encoding=ENCODING) as file:
         while line := file.readline().rstrip():
             json_announcement = json.loads(line)
             key = json_announcement["_id"]
