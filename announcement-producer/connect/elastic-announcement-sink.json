@@ -1,0 +1,10 @@
+{
+  "name": "elasticsearch-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "topics": "announcements",
+    "connection.url": "http://elasticsearch:9200",
+    "key.ignore": "false",
+    "schema.ignore": "true"
+  }
+}
