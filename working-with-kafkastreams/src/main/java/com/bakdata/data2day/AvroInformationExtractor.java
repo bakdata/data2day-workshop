@@ -48,6 +48,6 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
     }
 
     public static void main(final String... args) {
-        startApplication(new ProtoInformationExtractor(), args);
+        startApplication(new AvroInformationExtractor(), args);
     }
 }
