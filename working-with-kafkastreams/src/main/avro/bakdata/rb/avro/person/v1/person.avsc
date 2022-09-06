@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "AvroPerson",
+  "namespace": "com.bakdata.rb.avro.person.v1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "first_name",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "last_name",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "birthday",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "birth_location",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "corporate_id",
+      "type": ["null", "string"],
+      "default": null
+    }
+  ]
+}
