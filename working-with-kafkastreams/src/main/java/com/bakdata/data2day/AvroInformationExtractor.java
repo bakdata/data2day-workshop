@@ -17,7 +17,7 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
     @Override
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
-            builder.stream(this.getInputTopics(), Consumed.with(Serdes.String(), Serdes.String()));
+            builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
         final JsonExtractor jsonExtractor = new JsonExtractor();
 
         final String corporateTopic = this.getOutputTopic("corporate");

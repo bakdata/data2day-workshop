@@ -3,3 +3,4 @@ working-with-kafkastreams/build
 .DS_Store
 .idea
 announcement-producer/corporate-events-dump.json
+working-with-kafkastreams/.gradle
