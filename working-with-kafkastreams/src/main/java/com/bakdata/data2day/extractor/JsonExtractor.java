@@ -66,8 +66,6 @@ public class JsonExtractor {
     private static void addBirthInformationToPerson(final MatchResult matcher,
         final List<String> officerInfoList,
         final PersonPojoBuilder person) {
-        person.birthday("");
-        person.birthLocation("");
         if (officerInfoList.get(2).contains("*")) {
             person.birthday(officerInfoList.get(2).replace("*", ""));
             person.birthLocation(matcher.group(5));
