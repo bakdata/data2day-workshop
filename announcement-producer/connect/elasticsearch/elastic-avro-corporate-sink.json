@@ -5,5 +5,5 @@
     "connection.url": "http://elasticsearch:9200",
     "key.ignore": "false",
     "value.converter": "io.confluent.connect.avro.AvroConverter",
-    "value.converter.schema.registry.url": "http://schema-registry:8081",
+    "value.converter.schema.registry.url": "http://schema-registry:8081"
 }
