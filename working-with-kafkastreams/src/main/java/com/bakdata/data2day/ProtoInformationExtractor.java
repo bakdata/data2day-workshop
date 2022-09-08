@@ -13,7 +13,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 
-@Setter
+//@Setter
 public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
 
