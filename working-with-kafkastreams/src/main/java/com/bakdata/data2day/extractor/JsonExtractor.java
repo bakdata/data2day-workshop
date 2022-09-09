@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A JSON extractor to pull out information from a JSON string into {@link CorporatePojo} and {@link PersonPojo}.
+ */
 @Slf4j
 public class JsonExtractor {
     private static final Pattern PERSON_PATTERN =
@@ -25,6 +28,12 @@ public class JsonExtractor {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Extracts person information.
+     *
+     * @param json input JSON string
+     * @return List of {@link  PersonPojo}
+     */
     public List<PersonPojo> extractPerson(final String json) {
         try {
             final JsonNode jsonNode = this.mapper.readTree(json);
@@ -35,21 +44,45 @@ public class JsonExtractor {
             while (matcher.find()) {
                 final String fullOfficerInfo = matcher.group(0);
                 final List<String> officerInfoList = List.of(COMMA.split(fullOfficerInfo));
-                final PersonPojoBuilder person = createPerson(rawText, officerInfoList);
-                try {
-                    addBirthInformationToPerson(matcher, officerInfoList, person);
-                } catch (final IndexOutOfBoundsException exception) {
-                    log.error("The was an error in getting the birthday and birth location of the person in: {}",
-                        jsonNode.get("id"));
-                    continue;
+                if (officerInfoList.isEmpty()) {
+                    final String message =
+                        String.format("Could not extract any person from %s", jsonNode.get("id"));
+                    throw new JsonExtractorException(message);
                 }
+                final PersonPojoBuilder person = createPerson(rawText, officerInfoList);
+                addBirthInformationToPerson(matcher, officerInfoList, person);
 
                 personList.add(person.build());
             }
             return personList;
         } catch (final JsonProcessingException exception) {
             log.error("Error in reading the input JSON.");
-            return List.of(PersonPojo.builder().build());
+            throw new RuntimeException("");
+        }
+    }
+
+    /**
+     * Extracts corporate information.
+     *
+     * @param json input JSON string
+     * @return a {@link CorporatePojo} object
+     */
+    public CorporatePojo extractCorporate(final String json) {
+        try {
+            final JsonNode jsonNode = this.mapper.readTree(json);
+
+            final String rawText = jsonNode.get("information").asText();
+            final List<String> companyNameAddress = List.of(COMMA.split(rawText));
+            if (companyNameAddress.isEmpty()) {
+                final String message =
+                    String.format("Could not extract street and city information from %s", jsonNode.get("id"));
+                throw new JsonExtractorException(message);
+            }
+            return createCorporate(jsonNode, rawText, companyNameAddress);
+        } catch (final JsonProcessingException exception) {
+            final String errorMessage = "Error in reading the input JSON.";
+            log.error(errorMessage);
+            throw new JsonExtractorException(errorMessage);
         }
     }
 
@@ -75,28 +108,15 @@ public class JsonExtractor {
         }
     }
 
-    public CorporatePojo extractCorporate(final String json) {
-        try {
-            final JsonNode jsonNode = this.mapper.readTree(json);
+    private static CorporatePojo createCorporate(final JsonNode jsonNode, final String rawText,
+        final List<String> companyNameAddress) {
+        final CorporatePojoBuilder corporate = CorporatePojo.builder().id(generateId(getCorporateName(rawText)));
+        corporate.referenceId(jsonNode.get("reference_id").asText());
+        corporate.name(getCorporateName(rawText));
+        corporate.street(companyNameAddress.get(2));
+        corporate.city(companyNameAddress.get(1));
 
-            final String rawText = jsonNode.get("information").asText();
-            final List<String> companyNameAddress = List.of(COMMA.split(rawText));
-
-            final CorporatePojoBuilder corporate = CorporatePojo.builder().id(generateId(getCorporateName(rawText)));
-            try {
-                corporate.referenceId(jsonNode.get("reference_id").asText());
-                corporate.name(getCorporateName(rawText));
-                corporate.street(companyNameAddress.get(2));
-                corporate.city(companyNameAddress.get(1));
-            } catch (final IndexOutOfBoundsException exception) {
-                log.error("There was a problem extracting getting the street or city name for {}", jsonNode.get("id"));
-                return corporate.build();
-            }
-            return corporate.build();
-        } catch (final JsonProcessingException exception) {
-            log.error("Error in reading the input JSON. Returning empty corporate.");
-            return CorporatePojo.builder().build();
-        }
+        return corporate.build();
     }
 
     private static String generateId(final CharSequence input) {
@@ -108,6 +128,9 @@ public class JsonExtractor {
     @NotNull
     private static String getCorporateName(final CharSequence rawText) {
         final List<String> companyNameAddress = List.of(COMMA.split(rawText));
+        if (companyNameAddress.isEmpty()) {
+            throw new JsonExtractorException("Could not extract any corporate name");
+        }
         return companyNameAddress.get(0).substring(companyNameAddress.get(0).indexOf(':') + 2);
     }
 }

@@ -12,6 +12,9 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 
+/**
+ * Kafka streams application for extracting person and corporate information in Avro.
+ */
 public class AvroInformationExtractor extends KafkaStreamsApplication {
 
     @Override
