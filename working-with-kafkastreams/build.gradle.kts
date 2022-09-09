@@ -22,9 +22,9 @@ dependencies {
     implementation(group = "com.google.protobuf", name = "protobuf-java", version = protobufVersion)
     implementation(group = "io.confluent", name = "kafka-streams-avro-serde", version = confluentVersion)
     implementation(group = "io.confluent", name = "kafka-streams-protobuf-serde", version = confluentVersion)
-    implementation(group = "org.jsoup", name = "jsoup", version = "1.15.2")
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.13.3")
     implementation(group = "com.google.protobuf", name = "protobuf-java-util", version = protobufVersion)
+    implementation(group = "info.picocli", name = "picocli", version = "4.6.3")
 
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = junitVersion)
     testImplementation(group = "com.google.guava", name = "guava", version = "31.1-jre")

@@ -6,6 +6,9 @@ import java.util.Objects;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Represents a corporate object.
+ */
 @Builder
 @Getter
 public class CorporatePojo {
@@ -15,6 +18,11 @@ public class CorporatePojo {
     private final String street;
     private final String city;
 
+    /**
+     * Converts the corporate POJO to a Protobuf corporate.
+     *
+     * @return {@link ProtoCorporate} object
+     */
     public ProtoCorporate toProto() {
         return ProtoCorporate.newBuilder()
             .setId(Objects.requireNonNullElse(this.id, ""))
@@ -25,6 +33,11 @@ public class CorporatePojo {
             .build();
     }
 
+    /**
+     * Converts the person POJO to an Avro corporate.
+     *
+     * @return {@link AvroCorporate} object
+     */
     public AvroCorporate toAvro() {
         return AvroCorporate
             .newBuilder()
