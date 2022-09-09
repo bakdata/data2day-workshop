@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * A JSON extractor to pull out information from a JSON string into {@link CorporatePojo} and {@link PersonPojo}.
  */
 @Slf4j
+@AllArgsConstructor
 public class JsonExtractor {
     private static final Pattern PERSON_PATTERN =
         Pattern.compile("(([\\p{L} -]+, )([\\p{L} -]+, )?([\\p{L}.\\/ -]+), \\*\\d{2}.\\d{2}.\\d{4})(, )?");
@@ -27,10 +29,6 @@ public class JsonExtractor {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final boolean shouldThrowException;
-
-    public JsonExtractor(final boolean shouldThrowException) {
-        this.shouldThrowException = shouldThrowException;
-    }
 
     /**
      * Extracts person information.

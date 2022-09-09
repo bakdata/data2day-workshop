@@ -67,8 +67,8 @@ class JsonExtractorTest {
         assertThat(new JsonExtractor(false).extractCorporate(fixture))
             .satisfies(expectedCorporate -> {
                 assertThat(expectedCorporate.getReferenceId()).isEqualTo("HRB 212060 B");
-                assertThat(expectedCorporate.getName()).isEqualTo(null);
-                assertThat(expectedCorporate.getCity()).isEqualTo(null);
+                assertThat(expectedCorporate.getName()).isNull();
+                assertThat(expectedCorporate.getCity()).isNull();
             });
     }
 }
