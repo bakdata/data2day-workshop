@@ -11,17 +11,22 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
+import picocli.CommandLine;
 
 /**
  * Kafka streams application for extracting person and corporate information in Avro.
  */
 public class AvroInformationExtractor extends KafkaStreamsApplication {
 
+    @CommandLine.Option(names = "--throw-exception",
+        description = "If the streams app should only log errors or throw an exception.")
+    private boolean shouldThrowException = false;
+
     @Override
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
             builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
-        final JsonExtractor jsonExtractor = new JsonExtractor();
+        final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
         final String corporateTopic = this.getOutputTopic("corporate");
         input.mapValues(jsonExtractor::extractCorporate)

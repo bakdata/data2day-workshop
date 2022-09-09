@@ -15,7 +15,6 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A JSON extractor to pull out information from a JSON string into {@link CorporatePojo} and {@link PersonPojo}.
@@ -27,6 +26,11 @@ public class JsonExtractor {
     private static final Pattern COMMA = Pattern.compile(", ");
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private final boolean shouldThrowException;
+
+    public JsonExtractor(final boolean shouldThrowException) {
+        this.shouldThrowException = shouldThrowException;
+    }
 
     /**
      * Extracts person information.
@@ -44,15 +48,28 @@ public class JsonExtractor {
             while (matcher.find()) {
                 final String fullOfficerInfo = matcher.group(0);
                 final List<String> officerInfoList = List.of(COMMA.split(fullOfficerInfo));
-                if (officerInfoList.isEmpty()) {
-                    final String message =
-                        String.format("Could not extract any person from %s", jsonNode.get("id"));
-                    throw new JsonExtractorException(message);
+                if (officerInfoList.size() < 3) {
+                    final String errorMessage =
+                        String.format("Could not extract person information from %s", jsonNode.get("id"));
+                    if (this.shouldThrowException) {
+                        throw new JsonExtractorException(errorMessage);
+                    }
+                    log.error(errorMessage);
+                    continue;
                 }
                 final PersonPojoBuilder person = createPerson(rawText, officerInfoList);
                 addBirthInformationToPerson(matcher, officerInfoList, person);
 
                 personList.add(person.build());
+            }
+            if (personList.isEmpty()) {
+                final String errorMessage =
+                    String.format("Could not extract any person from %s", jsonNode.get("id"));
+                if (this.shouldThrowException) {
+                    throw new JsonExtractorException(errorMessage);
+                }
+                log.error(errorMessage);
+                personList.add(PersonPojo.builder().build());
             }
             return personList;
         } catch (final JsonProcessingException exception) {
@@ -73,10 +90,14 @@ public class JsonExtractor {
 
             final String rawText = jsonNode.get("information").asText();
             final List<String> companyNameAddress = List.of(COMMA.split(rawText));
-            if (companyNameAddress.isEmpty()) {
-                final String message =
+            if (companyNameAddress.size() < 2) {
+                final String errorMessage =
                     String.format("Could not extract street and city information from %s", jsonNode.get("id"));
-                throw new JsonExtractorException(message);
+                if (this.shouldThrowException) {
+                    throw new JsonExtractorException(errorMessage);
+                }
+                log.error(errorMessage);
+                return CorporatePojo.builder().referenceId(jsonNode.get("reference_id").asText()).build();
             }
             return createCorporate(jsonNode, rawText, companyNameAddress);
         } catch (final JsonProcessingException exception) {
@@ -125,12 +146,8 @@ public class JsonExtractor {
             .toString();
     }
 
-    @NotNull
     private static String getCorporateName(final CharSequence rawText) {
         final List<String> companyNameAddress = List.of(COMMA.split(rawText));
-        if (companyNameAddress.isEmpty()) {
-            throw new JsonExtractorException("Could not extract any corporate name");
-        }
         return companyNameAddress.get(0).substring(companyNameAddress.get(0).indexOf(':') + 2);
     }
 }

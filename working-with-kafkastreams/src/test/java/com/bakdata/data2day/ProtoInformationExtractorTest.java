@@ -59,7 +59,7 @@ class ProtoInformationExtractorTest {
             .withSerde(Serdes.String(), Serdes.String())
             .add("1", fixture);
 
-        final JsonExtractor jsonExtractor = new JsonExtractor();
+        final JsonExtractor jsonExtractor = new JsonExtractor(false);
         final ProtoCorporate corporate = jsonExtractor.extractCorporate(fixture).toProto();
 
         final TestOutput<Object, Object> producerRecords =
@@ -77,7 +77,7 @@ class ProtoInformationExtractorTest {
     @Test
     void shouldExtractPersonInProto() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
-        final JsonExtractor jsonExtractor = new JsonExtractor();
+        final JsonExtractor jsonExtractor = new JsonExtractor(false);
 
         final List<ProtoPerson> person = jsonExtractor.extractPerson(fixture)
             .stream().map(PersonPojo::toProto).collect(Collectors.toList());
