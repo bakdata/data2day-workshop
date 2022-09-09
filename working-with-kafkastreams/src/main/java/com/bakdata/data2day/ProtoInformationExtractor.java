@@ -6,16 +6,13 @@ import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import io.confluent.kafka.streams.serdes.protobuf.KafkaProtobufSerde;
 import java.util.Properties;
-import lombok.Setter;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 
-@Setter
 public class ProtoInformationExtractor extends KafkaStreamsApplication {
-
 
     @Override
     public void buildTopology(final StreamsBuilder builder) {
