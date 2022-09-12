@@ -60,7 +60,7 @@ class ProtoInformationExtractorTest {
             .add("1", fixture);
 
         final JsonExtractor jsonExtractor = new JsonExtractor(false);
-        final ProtoCorporate corporate = jsonExtractor.extractCorporate(fixture).toProto();
+        final ProtoCorporate corporate = jsonExtractor.extractCorporate(fixture).get().toProto();
 
         final TestOutput<Object, Object> producerRecords =
             this.testTopology.streamOutput(this.app.getOutputTopic("corporate"));
@@ -99,5 +99,16 @@ class ProtoInformationExtractorTest {
             .hasKey(person.get(1).getId())
             .hasValue(person.get(1))
             .expectNoMoreRecord();
+    }
+
+    @Test
+    void shouldNotExtractWithCorporateDataInAvro() throws IOException {
+        final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
+
+        this.testTopology.input()
+            .withSerde(Serdes.String(), Serdes.String())
+            .add("1", fixture);
+
+        this.testTopology.streamOutput(this.app.getOutputTopic("corporate")).expectNoMoreRecord();
     }
 }

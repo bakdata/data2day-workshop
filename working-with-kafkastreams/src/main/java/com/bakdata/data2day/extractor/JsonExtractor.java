@@ -10,7 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +34,12 @@ public class JsonExtractor {
 
     /**
      * Extracts person information.
+     *
+     * <ul>
+     *     <li>When <i>shouldThrowException</i> is false: Returns an empty list if no person's information could be
+     *     extracted from the announcement JSON.</li>
+     *     <li>When <i>shouldThrowException</i> is true: Throws a {@link JsonExtractorException}.</li>
+     * </ul>
      *
      * @param json input JSON string
      * @return List of {@link  PersonPojo}
@@ -67,22 +75,29 @@ public class JsonExtractor {
                     throw new JsonExtractorException(errorMessage);
                 }
                 log.error(errorMessage);
-                personList.add(PersonPojo.builder().build());
+                return Collections.emptyList();
             }
             return personList;
         } catch (final JsonProcessingException exception) {
-            log.error("Error in reading the input JSON.");
-            throw new RuntimeException("");
+            final String errorMessage = "Error in reading the input JSON.";
+            log.error(errorMessage);
+            throw new JsonExtractorException(errorMessage);
         }
     }
 
     /**
      * Extracts corporate information.
      *
+     * <ul>
+     *     <li>When <i>shouldThrowException</i> is false: Returns Optional.empty() if no corporate's information
+     *     could be extracted from the announcement JSON.</li>
+     *     <li>When <i>shouldThrowException</i> is true: Throws a {@link JsonExtractorException}.</li>
+     * </ul>
+     *
      * @param json input JSON string
-     * @return a {@link CorporatePojo} object
+     * @return an optional {@link CorporatePojo} object
      */
-    public CorporatePojo extractCorporate(final String json) {
+    public Optional<CorporatePojo> extractCorporate(final String json) {
         try {
             final JsonNode jsonNode = this.mapper.readTree(json);
 
@@ -95,9 +110,9 @@ public class JsonExtractor {
                     throw new JsonExtractorException(errorMessage);
                 }
                 log.error(errorMessage);
-                return CorporatePojo.builder().referenceId(jsonNode.get("reference_id").asText()).build();
+                return Optional.empty();
             }
-            return createCorporate(jsonNode, rawText, companyNameAddress);
+            return Optional.of(createCorporate(jsonNode, rawText, companyNameAddress));
         } catch (final JsonProcessingException exception) {
             final String errorMessage = "Error in reading the input JSON.";
             log.error(errorMessage);
