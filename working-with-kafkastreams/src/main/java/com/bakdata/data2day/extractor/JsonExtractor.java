@@ -88,7 +88,7 @@ public class JsonExtractor {
 
             final String rawText = jsonNode.get("information").asText();
             final List<String> companyNameAddress = List.of(COMMA.split(rawText));
-            if (companyNameAddress.size() < 2) {
+            if (companyNameAddress.size() < 3) {
                 final String errorMessage =
                     String.format("Could not extract street and city information from %s", jsonNode.get("id"));
                 if (this.shouldThrowException) {
