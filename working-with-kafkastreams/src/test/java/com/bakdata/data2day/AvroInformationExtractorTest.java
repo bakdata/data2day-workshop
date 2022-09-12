@@ -44,7 +44,8 @@ class AvroInformationExtractorTest {
             .add("1", fixture);
 
         final JsonExtractor jsonExtractor = new JsonExtractor(false);
-        final AvroCorporate corporate = jsonExtractor.extractCorporate(fixture).get().toAvro();
+        final AvroCorporate corporate =
+            jsonExtractor.extractCorporate(fixture).orElseThrow(RuntimeException::new).toAvro();
 
         this.testTopology.streamOutput(this.app.getOutputTopic("corporate"))
             .expectNextRecord()
