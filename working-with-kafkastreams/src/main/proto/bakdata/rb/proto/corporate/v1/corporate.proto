@@ -6,7 +6,6 @@ option java_package = "com.bakdata.rb.proto.corporate.v1";
 option java_multiple_files = true;
 
 message ProtoCorporate {
-    // generated hash from lower case and removed whitespace of company name
     string id = 1;
     string reference_id = 2;
     string name = 3;
