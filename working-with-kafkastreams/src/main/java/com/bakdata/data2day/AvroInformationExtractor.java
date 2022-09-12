@@ -5,6 +5,7 @@ import com.bakdata.data2day.model.CorporatePojo;
 import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import java.util.Optional;
 import java.util.Properties;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -30,6 +31,8 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
 
         final String corporateTopic = this.getOutputTopic("corporate");
         input.mapValues(jsonExtractor::extractCorporate)
+            .filter(((key, value) -> value.isPresent()))
+            .mapValues(Optional::get)
             .selectKey((key, value) -> value.getId())
             .mapValues(CorporatePojo::toAvro)
             .to(corporateTopic);
