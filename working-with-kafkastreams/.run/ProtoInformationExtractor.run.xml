@@ -2,7 +2,7 @@
   <configuration default="false" name="ProtoInformationExtractor" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="com.bakdata.data2day.ProtoInformationExtractor" />
     <module name="working-with-kafkastreams.main" />
-    <option name="PROGRAM_PARAMETERS" value="--brokers=localhost:29092 --schema-registry-url=http://localhost:8081 --input-topics=announcements --extra-output-topics=corporate=proto-corporate,person=proto-person" />
+    <option name="PROGRAM_PARAMETERS" value="--brokers=localhost:29092 --schema-registry-url=http://localhost:8081 --input-topics=announcements --extra-output-topics=corporate=proto-corporate --extra-output-topics=person=proto-person" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.bakdata.data2day.*" />
