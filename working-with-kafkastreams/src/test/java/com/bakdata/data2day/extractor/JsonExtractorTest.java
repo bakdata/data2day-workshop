@@ -32,9 +32,7 @@ class JsonExtractorTest {
 
         final Optional<CorporatePojo> corporate = new JsonExtractor(false).extractCorporate(fixture);
 
-        assertThat(corporate).isPresent();
-
-        assertThat(corporate.get()).satisfies(expectedCorporate -> {
+        assertThat(corporate).hasValueSatisfying(expectedCorporate -> {
             assertThat(expectedCorporate.getName()).isEqualTo("Unser Cafe Verwaltungs GmbH");
             assertThat(expectedCorporate.getCity()).isEqualTo("Berlin");
         });
