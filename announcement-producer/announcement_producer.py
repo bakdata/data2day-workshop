@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 class AnnouncementProducer:
-    BOOTSTRAP_SERVER: str = "localhost:29092"
+    BOOTSTRAP_SERVER: str = "k8kafka-cp-kafka-headless.infrastructure:9092"
     TOPIC = "announcements"
 
     def __init__(self):

@@ -1,0 +1,27 @@
+image: "us.gcr.io/gcp-bakdata-cluster/d2d-avro-converter"
+imageTag: "latest"
+
+streams:
+  inputTopics:
+    - "announcements"
+  brokers: "k8kafka-cp-kafka-headless.infrastructure:9092"
+  schemaRegistryUrl: "http://k8kafka-cp-schema-registry.infrastructure:8081"
+  extraOutputTopics:
+    "corporate": "avro-corporate"
+    "person": "avro-person"
+
+
+autoscaling:
+  consumergroup: avro-corporate-information-extractor-avro-corporate-avro-person
+  enabled: true
+  maxReplicas: 1
+  lagThreshold: "10000"
+
+nameOverride: avro-converter
+
+labels:
+  pipeline: data2day
+
+prometheus:
+  jmx:
+    enabled: false

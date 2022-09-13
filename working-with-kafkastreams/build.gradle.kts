@@ -4,6 +4,7 @@ plugins {
     id("com.google.protobuf") version "0.8.19"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.3.0"
     id("io.freefair.lombok") version "6.5.1"
+    id("com.google.cloud.tools.jib") version "3.1.4"
 }
 
 group = "com.bakdata.data2day"
@@ -46,6 +47,12 @@ dependencies {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+jib {
+    container {
+        mainClass = "com.bakdata.data2day.AvroInformationExtractor"
+    }
 }
 
 avro {
