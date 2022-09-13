@@ -46,7 +46,8 @@ public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
     @Override
     public String getUniqueAppId() {
-        return String.format("proto-corporate-information-extractor-%s", this.getOutputTopic());
+        return String.format("proto-corporate-information-extractor-%s-%s", this.getOutputTopic("corporate"),
+                this.getOutputTopic("person"));
     }
 
     @Override
