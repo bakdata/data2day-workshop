@@ -44,7 +44,7 @@ class AvroInformationExtractorTest {
             .withValueSerde(Serdes.String())
             .add("1", fixture);
 
-        final JsonExtractor jsonExtractor = new JsonExtractor();
+        final JsonExtractor jsonExtractor = new JsonExtractor(false);
         final AvroCorporate corporate = jsonExtractor.extractCorporate(fixture).toAvro();
 
         this.testTopology.streamOutput(this.app.getOutputTopic("corporate"))
@@ -58,7 +58,7 @@ class AvroInformationExtractorTest {
     void shouldExtractPersonInAvro() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
 
-        final JsonExtractor jsonExtractor = new JsonExtractor();
+        final JsonExtractor jsonExtractor = new JsonExtractor(false);
         final List<AvroPerson> person = jsonExtractor.extractPerson(fixture)
             .stream().map(PersonPojo::toAvro).collect(Collectors.toList());
 

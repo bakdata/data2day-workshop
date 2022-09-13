@@ -6,6 +6,9 @@ import java.util.Objects;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Represents a person object.
+ */
 @Builder
 @Getter
 public class PersonPojo {
@@ -16,6 +19,11 @@ public class PersonPojo {
     private final String birthLocation;
     private final String corporateId;
 
+    /**
+     * Converts the person POJO to a Protobuf person.
+     *
+     * @return {@link ProtoPerson} object
+     */
     public ProtoPerson toProto() {
         return ProtoPerson.newBuilder()
             .setId(Objects.requireNonNullElse(this.id, ""))
@@ -27,6 +35,11 @@ public class PersonPojo {
             .build();
     }
 
+    /**
+     * Converts the person POJO to an Avro person.
+     *
+     * @return {@link AvroPerson} object
+     */
     public AvroPerson toAvro() {
         return AvroPerson.newBuilder()
             .setId(this.id)
