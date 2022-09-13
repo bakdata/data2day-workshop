@@ -1,3 +1,15 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: announcement-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 10Gi
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -5,8 +17,27 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+        - name: downloader
+          image: google/cloud-sdk
+          args:
+            - "gsutil"
+            - "cp"
+            - "gs://data2day/corporate-events-dump"
+            - "/tmp/data/"
+          volumeMounts:
+            - name: announcement-data
+              mountPath: /tmp/data
       containers:
-      - name: producer
-        image: us.gcr.io/gcp-bakdata-cluster/d2d-announcement-producer
+        - name: producer
+          image: us.gcr.io/gcp-bakdata-cluster/d2d-announcement-producer
+          args: [ "/data/corporate-events-dump" ]
+          volumeMounts:
+            - name: announcement-data
+              mountPath: /data
+      volumes:
+        - name: announcement-data
+          persistentVolumeClaim:
+            claimName: announcement-data
       restartPolicy: Never
   backoffLimit: 4

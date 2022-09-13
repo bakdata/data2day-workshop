@@ -9,6 +9,7 @@ streams:
   extraOutputTopics:
     "corporate": "avro-corporate"
     "person": "avro-person"
+  errorTopic: "announcement-errors"
 
 
 autoscaling:
