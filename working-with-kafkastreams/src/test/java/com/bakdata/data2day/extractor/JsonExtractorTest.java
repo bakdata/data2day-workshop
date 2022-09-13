@@ -9,6 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class JsonExtractorTest {
@@ -29,9 +30,9 @@ class JsonExtractorTest {
     void shouldExtractCorporate() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
 
-        final CorporatePojo corporate = new JsonExtractor(false).extractCorporate(fixture);
+        final Optional<CorporatePojo> corporate = new JsonExtractor(false).extractCorporate(fixture);
 
-        assertThat(corporate).satisfies(expectedCorporate -> {
+        assertThat(corporate).hasValueSatisfying(expectedCorporate -> {
             assertThat(expectedCorporate.getName()).isEqualTo("Unser Cafe Verwaltungs GmbH");
             assertThat(expectedCorporate.getCity()).isEqualTo("Berlin");
         });
@@ -49,7 +50,7 @@ class JsonExtractorTest {
     void shouldReturnEmptyPersonWhenWrongFormatInTextAndThrowExceptionIsDisabled() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
 
-        assertThat(new JsonExtractor(false).extractPerson(fixture)).hasSize(1);
+        assertThat(new JsonExtractor(false).extractPerson(fixture)).isEmpty();
     }
 
     @Test
@@ -64,11 +65,6 @@ class JsonExtractorTest {
     void shouldReturnEmptyCorporateWhenWrongFormatInTextAndThrowExceptionIsDisabled() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
 
-        assertThat(new JsonExtractor(false).extractCorporate(fixture))
-            .satisfies(expectedCorporate -> {
-                assertThat(expectedCorporate.getReferenceId()).isEqualTo("HRB 212060 B");
-                assertThat(expectedCorporate.getName()).isNull();
-                assertThat(expectedCorporate.getCity()).isNull();
-            });
+        assertThat(new JsonExtractor(false).extractCorporate(fixture)).isNotPresent();
     }
 }
