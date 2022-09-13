@@ -4,19 +4,18 @@ import com.bakdata.data2day.extractor.JsonExtractor;
 import com.bakdata.data2day.model.CorporatePojo;
 import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.AvroDeadLetterConverter;
-import com.bakdata.kafka.ErrorCapturingValueMapper;
+import com.bakdata.kafka.ErrorCapturingFlatValueMapper;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import com.bakdata.kafka.ProcessedValue;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import picocli.CommandLine;
-import org.apache.kafka.streams.kstream.ValueMapper;
 
 /**
  * Kafka streams application for extracting person and corporate information in Avro.
@@ -34,7 +33,8 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
         final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
         final KStream<String, ProcessedValue<String, CorporatePojo>> mapped =
-                input.mapValues(ErrorCapturingValueMapper.captureErrors(jsonExtractor::extractCorporate));
+                input.flatMapValues(ErrorCapturingFlatValueMapper.captureErrors(
+                        json -> jsonExtractor.extractCorporate(json).stream().collect(Collectors.toList())));
         mapped.flatMapValues(ProcessedValue::getValues)
             .selectKey((key, value) -> value.getId())
             .mapValues(CorporatePojo::toAvro)
