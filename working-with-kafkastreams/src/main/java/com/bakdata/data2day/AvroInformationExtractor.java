@@ -8,6 +8,7 @@ import com.bakdata.kafka.ErrorCapturingValueMapper;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import com.bakdata.kafka.ProcessedValue;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import java.util.Optional;
 import java.util.Properties;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
