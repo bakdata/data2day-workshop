@@ -4,6 +4,7 @@ import com.bakdata.data2day.extractor.JsonExtractor;
 import com.bakdata.data2day.model.CorporatePojo;
 import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.AvroDeadLetterConverter;
+import com.bakdata.kafka.DeadLetter;
 import com.bakdata.kafka.ErrorCapturingFlatValueMapper;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import com.bakdata.kafka.ProcessedValue;
@@ -29,25 +30,31 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
     @Override
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
-            builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
+                builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
         final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
-        final KStream<String, ProcessedValue<String, CorporatePojo>> mapped =
+        final KStream<String, ProcessedValue<String, CorporatePojo>> mappedCorporate =
                 input.flatMapValues(ErrorCapturingFlatValueMapper.captureErrors(
                         json -> jsonExtractor.extractCorporate(json).stream().collect(Collectors.toList())));
-        mapped.flatMapValues(ProcessedValue::getValues)
-            .selectKey((key, value) -> value.getId())
-            .mapValues(CorporatePojo::toAvro)
-            .to(this.getOutputTopic("corporate"));
-        mapped.flatMapValues(ProcessedValue::getErrors)
-            .transformValues(AvroDeadLetterConverter.asTransformer("Error parsing corporate"))
-            .to(this.getErrorTopic());
+        mappedCorporate.flatMapValues(ProcessedValue::getValues)
+                .selectKey((key, value) -> value.getId())
+                .mapValues(CorporatePojo::toAvro)
+                .to(this.getOutputTopic("corporate"));
+        final KStream<String, DeadLetter> corporateErrors = mappedCorporate.flatMapValues(ProcessedValue::getErrors)
+                .transformValues(AvroDeadLetterConverter.asTransformer("Error parsing corporate"));
 
         final String personTopic = this.getOutputTopic("person");
-        input.flatMapValues(jsonExtractor::extractPerson)
-            .selectKey((key, value) -> value.getId())
-            .mapValues(PersonPojo::toAvro)
-            .to(personTopic);
+        final KStream<String, ProcessedValue<String, PersonPojo>> mappedPerson =
+                input.flatMapValues(ErrorCapturingFlatValueMapper.captureErrors(jsonExtractor::extractPerson));
+        mappedPerson.flatMapValues(ProcessedValue::getValues)
+                .selectKey((key, value) -> value.getId())
+                .mapValues(PersonPojo::toAvro)
+                .to(personTopic);
+
+        final KStream<String, DeadLetter> personErrors = mappedPerson.flatMapValues(ProcessedValue::getErrors)
+                .transformValues(AvroDeadLetterConverter.asTransformer("Error parsing person"));
+        corporateErrors.merge(personErrors)
+                .to(this.getErrorTopic());
     }
 
     @Override
