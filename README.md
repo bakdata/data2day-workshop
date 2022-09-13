@@ -5,11 +5,8 @@ Start the docker-compose Kafka cluster, including the Redpanda Console, Elastics
 1. Make sure `docker` and `docker-compose` are installed on your machine
 2. To start the kafka cluster run `docker-compose up -d`
 
+When the cluster is running, you can follow these steps:
 
-## Elasticsearch
-
-After you set up the Kafka connectors, you can search the Elasticsearch indices using the Elasticsearch REST-API. E.g. the announcements index:
-
-```sh
-curl "http://localhost:9200/announcements/_search"
-```
+1. Install and run the announcements [producer](./announcement-producer/README.md)
+2. Run the [corporate and persons extractor Kafka Streams app](./working-with-kafkastreams/README.md)
+3. [Create the Kafka Connectors](./connectors/README.md) and explore the results in Elasticsearch and Neo4j
