@@ -33,14 +33,14 @@ dependencies {
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
     testImplementation(group = "org.assertj", name = "assertj-core", version = "3.23.1")
     testImplementation(
-        group = "com.bakdata.fluent-kafka-streams-tests",
-        name = "fluent-kafka-streams-tests-junit5",
-        version = "2.7.0"
+            group = "com.bakdata.fluent-kafka-streams-tests",
+            name = "fluent-kafka-streams-tests-junit5",
+            version = "2.7.0"
     )
     testImplementation(
-        group = "com.bakdata.fluent-kafka-streams-tests",
-        name = "schema-registry-mock",
-        version = "2.7.0"
+            group = "com.bakdata.fluent-kafka-streams-tests",
+            name = "schema-registry-mock",
+            version = "2.7.0"
     )
 
 }
@@ -61,3 +61,31 @@ avro {
     setFieldVisibility("PRIVATE")
 }
 
+
+val brokersArg = "--brokers=localhost:29092"
+val schemaRegistryArg = "--schema-registry-url=http://localhost:8081"
+val inputTopicArg = "--input-topics=announcements"
+
+tasks.register<JavaExec>("runAvroInformationExtractor") {
+    classpath(sourceSets["main"].runtimeClasspath)
+    mainClass.set("com.bakdata.data2day.AvroInformationExtractor")
+    args(listOf(
+            brokersArg,
+            schemaRegistryArg,
+            inputTopicArg,
+            "--extra-output-topics=corporate=avro-corporate",
+            "--extra-output-topics=person=avro-person"
+    ))
+}
+
+tasks.register<JavaExec>("runProtoInformationExtractor") {
+    classpath(sourceSets["main"].runtimeClasspath)
+    mainClass.set("com.bakdata.data2day.ProtoInformationExtractor")
+    args(listOf(
+            brokersArg,
+            schemaRegistryArg,
+            inputTopicArg,
+            "--extra-output-topics=corporate=avro-corporate",
+            "--extra-output-topics=person=avro-person"
+    ))
+}

@@ -1,9 +1,0 @@
-{
-    "name": "elastic-proto-person-sink",
-    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-    "topics": "proto-person",
-    "connection.url": "http://elasticsearch:9200",
-    "key.ignore": "false",
-    "value.converter": "io.confluent.connect.protobuf.ProtobufConverter",
-    "value.converter.schema.registry.url": "http://schema-registry:8081"
-}
