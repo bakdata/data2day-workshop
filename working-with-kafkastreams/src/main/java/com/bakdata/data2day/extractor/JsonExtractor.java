@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.MatchResult;
@@ -75,7 +74,6 @@ public class JsonExtractor {
                     throw new JsonExtractorException(errorMessage);
                 }
                 log.error(errorMessage);
-                return Collections.emptyList();
             }
             return personList;
         } catch (final JsonProcessingException exception) {

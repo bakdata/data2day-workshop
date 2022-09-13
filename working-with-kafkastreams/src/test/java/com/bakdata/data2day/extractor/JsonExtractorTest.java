@@ -8,7 +8,6 @@ import com.bakdata.data2day.model.PersonPojo;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -31,9 +30,9 @@ class JsonExtractorTest {
     void shouldExtractCorporate() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
 
-        final CorporatePojo corporate = new JsonExtractor(false).extractCorporate(fixture).get();
+        final Optional<CorporatePojo> corporate = new JsonExtractor(false).extractCorporate(fixture);
 
-        assertThat(corporate).satisfies(expectedCorporate -> {
+        assertThat(corporate).hasValueSatisfying(expectedCorporate -> {
             assertThat(expectedCorporate.getName()).isEqualTo("Unser Cafe Verwaltungs GmbH");
             assertThat(expectedCorporate.getCity()).isEqualTo("Berlin");
         });
@@ -51,8 +50,7 @@ class JsonExtractorTest {
     void shouldReturnEmptyPersonWhenWrongFormatInTextAndThrowExceptionIsDisabled() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
 
-        assertThat(new JsonExtractor(false).extractPerson(fixture))
-            .isEqualTo(Collections.emptyList());
+        assertThat(new JsonExtractor(false).extractPerson(fixture)).isEmpty();
     }
 
     @Test
@@ -67,6 +65,6 @@ class JsonExtractorTest {
     void shouldReturnEmptyCorporateWhenWrongFormatInTextAndThrowExceptionIsDisabled() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
 
-        assertThat(new JsonExtractor(false).extractCorporate(fixture)).isEqualTo(Optional.empty());
+        assertThat(new JsonExtractor(false).extractCorporate(fixture)).isNotPresent();
     }
 }

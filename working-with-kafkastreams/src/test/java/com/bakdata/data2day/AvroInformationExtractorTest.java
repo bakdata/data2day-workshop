@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class AvroInformationExtractorTest {
     public static final String INPUT = "announcement-json";
     private final AvroInformationExtractor app = createExtractionApp();
     @RegisterExtension
-    final TestTopologyExtension<Object, Object> testTopology =
+    final TestTopologyExtension<String, SpecificRecord> testTopology =
         new TestTopologyExtension<>(this.app::createTopology, this.app.getKafkaProperties());
 
     @AfterEach
@@ -36,15 +37,16 @@ class AvroInformationExtractorTest {
     }
 
     @Test
-    void shouldExtractCorporateInProto() throws IOException {
+    void shouldExtractCorporateInAvro() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
 
         this.testTopology.input()
-            .withSerde(Serdes.String(), Serdes.String())
+            .withValueSerde(Serdes.String())
             .add("1", fixture);
 
         final JsonExtractor jsonExtractor = new JsonExtractor(false);
-        final AvroCorporate corporate = jsonExtractor.extractCorporate(fixture).get().toAvro();
+        final AvroCorporate corporate =
+            jsonExtractor.extractCorporate(fixture).orElseThrow(RuntimeException::new).toAvro();
 
         this.testTopology.streamOutput(this.app.getOutputTopic("corporate"))
             .expectNextRecord()
@@ -54,7 +56,7 @@ class AvroInformationExtractorTest {
     }
 
     @Test
-    void shouldExtractPersonInProto() throws IOException {
+    void shouldExtractPersonInAvro() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
 
         final JsonExtractor jsonExtractor = new JsonExtractor(false);
@@ -62,7 +64,7 @@ class AvroInformationExtractorTest {
             .stream().map(PersonPojo::toAvro).collect(Collectors.toList());
 
         this.testTopology.input()
-            .withSerde(Serdes.String(), Serdes.String())
+            .withValueSerde(Serdes.String())
             .add("1", fixture);
 
         this.testTopology.streamOutput(this.app.getOutputTopic("person"))
