@@ -11,7 +11,7 @@ import com.bakdata.rb.proto.person.v1.ProtoPerson;
 import com.bakdata.schemaregistrymock.SchemaRegistryMock;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.google.protobuf.DynamicMessage;
+import com.google.protobuf.Message;
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.protobuf.KafkaProtobufSerde;
@@ -32,8 +32,8 @@ class ProtoInformationExtractorTest {
     private final ProtoInformationExtractor app = createExtractionApp();
 
     @RegisterExtension
-    final TestTopologyExtension<String, DynamicMessage> testTopology =
-        new TestTopologyExtension<String, DynamicMessage>(this.app::createTopology, this.app.getKafkaProperties())
+    final TestTopologyExtension<String, Message> testTopology =
+        new TestTopologyExtension<String, Message>(this.app::createTopology, this.app.getKafkaProperties())
             .withSchemaRegistryMock(new SchemaRegistryMock(List.of(new ProtobufSchemaProvider())));
 
 
@@ -61,7 +61,7 @@ class ProtoInformationExtractorTest {
         final JsonExtractor jsonExtractor = new JsonExtractor();
         final ProtoCorporate corporate = jsonExtractor.extractCorporate(fixture).toProto();
 
-        final TestOutput<String, DynamicMessage> producerRecords =
+        final TestOutput<String, Message> producerRecords =
             this.testTopology.streamOutput(this.app.getOutputTopic("corporate"));
 
         assertThat(producerRecords.readOneRecord())
