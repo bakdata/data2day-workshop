@@ -1,19 +1,19 @@
 ---
 version: '3'
 services:
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     container_name: zookeeper
     hostname: zookeeper
+    restart: on-failure
     environment:
       SCHEMA_REGISTRY_HOST_NAME: zookeeper
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-
   kafka:
     image: confluentinc/cp-kafka:7.2.1
     container_name: kafka
+    restart: on-failure
     ports:
       # "`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-'"`-._,-
       # An important note about accessing Kafka from clients on other machines:
@@ -66,6 +66,7 @@ services:
     image: confluentinc/cp-kafka-connect:7.2.1
     container_name: kafka-connect
     hostname: connect
+    restart: on-failure
     depends_on:
       - zookeeper
       - kafka
@@ -127,6 +128,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
     container_name: elasticsearch
     hostname: elasticsearch
+    restart: on-failure
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
@@ -138,6 +140,7 @@ services:
     image: neo4j:4.4.11
     hostname: neo4j
     container_name: neo4j
+    restart: on-failure
     ports:
       - "7474:7474"
       - "7687:7687"
