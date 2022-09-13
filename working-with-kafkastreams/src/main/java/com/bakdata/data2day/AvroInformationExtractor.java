@@ -23,7 +23,7 @@ import org.apache.kafka.streams.kstream.ValueMapper;
 public class AvroInformationExtractor extends KafkaStreamsApplication {
 
     @CommandLine.Option(names = "--throw-exception",
-        description = "If the streams app should only log errors or throw an exception.")
+        description = "If the streams app should only log errors or throw an exception.", arity = "0..1")
     private boolean shouldThrowException = false;
 
     @Override

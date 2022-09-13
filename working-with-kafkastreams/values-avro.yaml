@@ -11,6 +11,8 @@ streams:
     "person": "avro-person"
   errorTopic: "announcement-errors"
 
+commandLine:
+  THROW_EXCEPTION: true
 
 autoscaling:
   consumergroup: avro-corporate-information-extractor-avro-corporate-avro-person
