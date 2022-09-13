@@ -11,7 +11,7 @@ import com.bakdata.rb.proto.person.v1.ProtoPerson;
 import com.bakdata.schemaregistrymock.SchemaRegistryMock;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.google.protobuf.DynamicMessage;
+import com.google.protobuf.Message;
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.protobuf.KafkaProtobufSerde;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -33,8 +32,8 @@ class ProtoInformationExtractorTest {
     private final ProtoInformationExtractor app = createExtractionApp();
 
     @RegisterExtension
-    final TestTopologyExtension<Object, Object> testTopology =
-        new TestTopologyExtension<>(this.app::createTopology, this.app.getKafkaProperties())
+    final TestTopologyExtension<String, Message> testTopology =
+        new TestTopologyExtension<String, Message>(this.app::createTopology, this.app.getKafkaProperties())
             .withSchemaRegistryMock(new SchemaRegistryMock(List.of(new ProtobufSchemaProvider())));
 
 
@@ -56,20 +55,20 @@ class ProtoInformationExtractorTest {
         final String fixture = Resources.toString(Resources.getResource("test.json"), Charsets.UTF_8);
 
         this.testTopology.input()
-            .withSerde(Serdes.String(), Serdes.String())
+            .withValueSerde(Serdes.String())
             .add("1", fixture);
 
         final JsonExtractor jsonExtractor = new JsonExtractor();
         final ProtoCorporate corporate = jsonExtractor.extractCorporate(fixture).toProto();
 
-        final TestOutput<Object, Object> producerRecords =
+        final TestOutput<String, Message> producerRecords =
             this.testTopology.streamOutput(this.app.getOutputTopic("corporate"));
 
         assertThat(producerRecords.readOneRecord())
             .satisfies(record -> {
                 assertThat(record).extracting(ProducerRecord::key).isEqualTo(corporate.getId());
                 assertThat(record)
-                    .extracting(ProducerRecord::value, InstanceOfAssertFactories.type(DynamicMessage.class))
+                    .extracting(ProducerRecord::value)
                     .satisfies(value -> assertThat(ProtoCorporate.parseFrom(value.toByteArray())).isEqualTo(corporate));
             });
     }
@@ -87,7 +86,7 @@ class ProtoInformationExtractorTest {
             this.testTopology.getSchemaRegistryUrl()), false);
 
         this.testTopology.input()
-            .withSerde(Serdes.String(), Serdes.String())
+            .withValueSerde(Serdes.String())
             .add("1", fixture);
 
         this.testTopology.streamOutput(this.app.getOutputTopic("person"))
