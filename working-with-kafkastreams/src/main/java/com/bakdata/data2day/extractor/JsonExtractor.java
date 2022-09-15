@@ -122,7 +122,6 @@ public class JsonExtractor {
         final String firstName = officerInfoList.get(1);
         final String lastName = officerInfoList.get(0);
         return PersonPojo.builder()
-            .id(generateId(firstName + lastName + getCorporateName(rawText)))
             .firstName(firstName)
             .lastName(lastName)
             .corporateId(generateId(getCorporateName(rawText)));
@@ -133,9 +132,11 @@ public class JsonExtractor {
         final PersonPojoBuilder person) {
         if (officerInfoList.get(2).contains("*")) {
             person.birthday(officerInfoList.get(2).replace("*", ""));
+            person.id(generateId(person.build().getFirstName() + person.build().getLastName() + person.build().getBirthday()));
             person.birthLocation(matcher.group(5));
         } else {
             person.birthday(officerInfoList.get(3).replace("*", ""));
+            person.id(generateId(person.build().getFirstName() + person.build().getLastName() + person.build().getBirthday()));
             person.birthLocation(officerInfoList.get(2));
         }
     }
