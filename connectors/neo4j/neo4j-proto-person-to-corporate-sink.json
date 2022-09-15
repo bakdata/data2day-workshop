@@ -1,0 +1,11 @@
+{
+    "name": "neo4j-proto-person-to-corporate-sink",
+    "topics": "proto-person, proto-corporate",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "value.converter": "io.confluent.connect.protobuf.ProtobufConverter",
+    "value.converter.schema.registry.url": "http://schema-registry:8081",
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.encryption.enabled": false,
+    "neo4j.topic.cypher.proto-corporate": "MERGE(c:Corporate{id:event.id}) SET c.name = event.name, c.referenceId = event.reference_id ,c.street = event.street, c.city = event.city",
+    "neo4j.topic.cypher.proto-person": "MERGE(p:Person{id: event.id}) SET p.firstName = event.first_name, p.lastName = event.last_name, p.birthday = event.birthday, p.birthLocation = event.birth_location MERGE(c:Corporate{id:event.corporate_id}) MERGE (p)-[r:WORKS_AT]->(c)"
+}
