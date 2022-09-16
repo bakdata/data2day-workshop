@@ -15,6 +15,8 @@
 
 ## Kubernetes
 
-`helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/streams-bootstrap/2.3.0/charts/`
-`helm repo update`
-`helm upgrade --install --values values-avro.yaml avro-converter bakdata-common/streams-app`
+```
+helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/streams-bootstrap/2.3.0/charts/
+helm repo update
+helm upgrade --install --values values-avro.yaml avro-converter bakdata-common/streams-app
+```
