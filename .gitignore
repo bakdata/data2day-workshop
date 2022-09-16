@@ -1,5 +1,6 @@
 working-with-kafkastreams/.idea
 working-with-kafkastreams/build
+working-with-kafkastreams/out
 .DS_Store
 .idea
 announcement-producer/corporate-events-dump
