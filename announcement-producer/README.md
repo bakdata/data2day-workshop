@@ -13,3 +13,10 @@ To run and produce announcements into a Kafka topic, following these steps:
 ## Kubernetes
 
 `kubectl apply -f job.yaml`
+
+## Kafka
+
+```
+kafka-topics --bootstrap-server k8kafka-cp-kafka-headless:9092 --create --partitions 10 --topic announcements
+kafka-console-producer --bootstrap-server k8kafka-cp-kafka-headless:9092 --topic announcements
+```
