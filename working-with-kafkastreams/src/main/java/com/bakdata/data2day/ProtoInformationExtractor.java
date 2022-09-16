@@ -1,10 +1,13 @@
 package com.bakdata.data2day;
 
 import com.bakdata.data2day.extractor.JsonExtractor;
+import com.bakdata.data2day.model.CorporatePojo;
+import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import com.bakdata.rb.proto.corporate.v1.ProtoCorporate;
 import com.bakdata.rb.proto.person.v1.ProtoPerson;
 import io.confluent.kafka.streams.serdes.protobuf.KafkaProtobufSerde;
+import java.util.Optional;
 import java.util.Properties;
 import lombok.Setter;
 import org.apache.kafka.common.serialization.Serdes;
@@ -35,10 +38,16 @@ public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
         final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
-        final KStream<String, ProtoCorporate> corporates = null; //TODO extract corporates here
+        final KStream<String, ProtoCorporate> corporates = input.mapValues(jsonExtractor::extractCorporate)
+                .filter(((key, value) -> value.isPresent()))
+                .mapValues(Optional::get)
+                .selectKey((key, value) -> value.getId())
+                .mapValues(CorporatePojo::toProto);
         corporates.to(this.getCorporateTopic());
 
-        final KStream<String, ProtoPerson> persons = null; //TODO extract persons here
+        final KStream<String, ProtoPerson> persons = input.flatMapValues(jsonExtractor::extractPerson)
+                .selectKey((key, value) -> value.getId())
+                .mapValues(PersonPojo::toProto);
         persons.to(this.getPersonTopic());
     }
 
