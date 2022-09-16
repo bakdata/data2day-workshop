@@ -6,6 +6,7 @@ import com.bakdata.rb.proto.corporate.v1.ProtoCorporate;
 import com.bakdata.rb.proto.person.v1.ProtoPerson;
 import io.confluent.kafka.streams.serdes.protobuf.KafkaProtobufSerde;
 import java.util.Properties;
+import lombok.Setter;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
@@ -16,11 +17,16 @@ import picocli.CommandLine;
 /**
  * Kafka streams application for extracting person and corporate information in Protobuf.
  */
+@Setter
 public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
     @CommandLine.Option(names = "--throw-exception",
             description = "If the streams app should only log errors or throw an exception.")
-    private final boolean shouldThrowException = false;
+    private boolean shouldThrowException;
+
+    public static void main(final String... args) {
+        startApplication(new ProtoInformationExtractor(), args);
+    }
 
     @Override
     public void buildTopology(final StreamsBuilder builder) {
@@ -29,12 +35,10 @@ public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
         final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
-        // extract corporates here
-        final KStream<String, ProtoCorporate> corporates = null;
+        final KStream<String, ProtoCorporate> corporates = null; //TODO extract corporates here
         corporates.to(this.getCorporateTopic());
 
-        // extract persons here
-        final KStream<String, ProtoPerson> persons = null;
+        final KStream<String, ProtoPerson> persons = null; //TODO extract persons here
         persons.to(this.getPersonTopic());
     }
 
@@ -42,14 +46,6 @@ public class ProtoInformationExtractor extends KafkaStreamsApplication {
     public String getUniqueAppId() {
         return String.format("proto-corporate-information-extractor-%s-%s", this.getCorporateTopic(),
                 this.getPersonTopic());
-    }
-
-    String getCorporateTopic() {
-        return this.getOutputTopic("corporate");
-    }
-
-    String getPersonTopic() {
-        return this.getOutputTopic("person");
     }
 
     @Override
@@ -61,7 +57,11 @@ public class ProtoInformationExtractor extends KafkaStreamsApplication {
         return kafkaProperties;
     }
 
-    public static void main(final String... args) {
-        startApplication(new ProtoInformationExtractor(), args);
+    String getCorporateTopic() {
+        return this.getOutputTopic("corporate");
+    }
+
+    String getPersonTopic() {
+        return this.getOutputTopic("person");
     }
 }
