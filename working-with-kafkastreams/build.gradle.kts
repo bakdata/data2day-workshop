@@ -49,12 +49,6 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-jib {
-    container {
-        mainClass = "com.bakdata.data2day.AvroInformationExtractor"
-    }
-}
-
 avro {
     setGettersReturnOptional(true)
     setOptionalGettersForNullableFieldsOnly(true)
