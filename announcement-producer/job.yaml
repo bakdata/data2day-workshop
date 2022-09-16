@@ -31,7 +31,7 @@ spec:
       containers:
         - name: producer
           image: us.gcr.io/gcp-bakdata-cluster/d2d-announcement-producer
-          args: [ "/data/corporate-events-dump" ]
+          args: [ "/data/corporate-events-dump", "--bootstrap-servers", "k8kafka-cp-kafka-headless.infrastructure:9092" ]
           volumeMounts:
             - name: announcement-data
               mountPath: /data

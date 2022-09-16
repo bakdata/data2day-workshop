@@ -7,21 +7,20 @@ log = logging.getLogger(__name__)
 
 
 class AnnouncementProducer:
-    BOOTSTRAP_SERVER: str = "k8kafka-cp-kafka-headless.infrastructure:9092"
-    TOPIC = "announcements"
 
-    def __init__(self):
+    def __init__(self, topic: str, bootstrap_servers: str):
         producer_conf = {
-            "bootstrap.servers": self.BOOTSTRAP_SERVER,
+            "bootstrap.servers": bootstrap_servers,
             "key.serializer": StringSerializer("utf_8"),
             "value.serializer": StringSerializer("utf_8"),
         }
 
         self.producer = SerializingProducer(producer_conf)
+        self.topic = topic
 
     def produce_to_topic(self, key: str, value: str):
         self.producer.produce(
-            topic=self.TOPIC,
+            topic=self.topic,
             partition=-1,
             key=key,
             value=value,
