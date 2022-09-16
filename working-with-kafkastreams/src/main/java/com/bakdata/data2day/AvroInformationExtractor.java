@@ -44,21 +44,22 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
         final KStream<String, ProcessedValue<String, CorporatePojo>> mappedCorporate =
                 input.flatMapValues(ErrorCapturingFlatValueMapper.captureErrors(
                         json -> jsonExtractor.extractCorporate(json).stream().collect(Collectors.toList())));
-        mappedCorporate.flatMapValues(ProcessedValue::getValues)
-                .selectKey((key, value) -> value.getId())
-                .mapValues(CorporatePojo::toAvro)
-                .to(this.getOutputTopic("corporate"));
-        final KStream<String, DeadLetter> corporateErrors = mappedCorporate.flatMapValues(ProcessedValue::getErrors)
-                .transformValues(AvroDeadLetterConverter.asTransformer("Error parsing corporate"));
+        final KStream<String, AvroCorporate> corporates =
+                mappedCorporate.flatMapValues(ProcessedValue::getValues)
+                        .selectKey((key, value) -> value.getId())
+                        .mapValues(CorporatePojo::toAvro);
+        corporates.to(this.getCorporateTopic());
 
-        final String personTopic = this.getOutputTopic("person");
         final KStream<String, ProcessedValue<String, PersonPojo>> mappedPerson =
                 input.flatMapValues(ErrorCapturingFlatValueMapper.captureErrors(jsonExtractor::extractPerson));
-        mappedPerson.flatMapValues(ProcessedValue::getValues)
-                .selectKey((key, value) -> value.getId())
-                .mapValues(PersonPojo::toAvro)
-                .to(personTopic);
+        final KStream<String, AvroPerson> persons =
+                mappedPerson.flatMapValues(ProcessedValue::getValues)
+                        .selectKey((key, value) -> value.getId())
+                        .mapValues(PersonPojo::toAvro);
+        persons.to(this.getPersonTopic());
 
+        final KStream<String, DeadLetter> corporateErrors = mappedCorporate.flatMapValues(ProcessedValue::getErrors)
+                .transformValues(AvroDeadLetterConverter.asTransformer("Error parsing corporate"));
         final KStream<String, DeadLetter> personErrors = mappedPerson.flatMapValues(ProcessedValue::getErrors)
                 .transformValues(AvroDeadLetterConverter.asTransformer("Error parsing person"));
         corporateErrors.merge(personErrors)

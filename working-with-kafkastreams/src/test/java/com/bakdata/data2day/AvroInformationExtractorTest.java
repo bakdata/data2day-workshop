@@ -33,6 +33,7 @@ class AvroInformationExtractorTest {
         final AvroInformationExtractor app = new AvroInformationExtractor();
         app.setInputTopics(List.of(INPUT));
         app.setExtraOutputTopics(Map.of("corporate", "avro-corporate", "person", "avro-person"));
+        app.setErrorTopic("error");
         return app;
     }
 
