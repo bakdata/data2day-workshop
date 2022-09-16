@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 @click.command()
 @click.option("-f", "--file", required=True, type=str, help="Path to the dump file")
-@click.option("--bootstrap-servers", default="localhost:9092", type=str,
+@click.option("--bootstrap-servers", default="localhost:29092", type=str,
               help="Bootstrap servers to connect to")
 @click.option("-t", "--topic", default="announcements", type=str,
               help="Topic to produce to")
