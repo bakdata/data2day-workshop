@@ -21,7 +21,7 @@ import picocli.CommandLine;
 public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
     @CommandLine.Option(names = "--throw-exception",
-            description = "If the streams app should only log errors or throw an exception.")
+            description = "If the streams app should only log errors or throw an exception.", arity = "0..1")
     private boolean shouldThrowException;
 
     public static void main(final String... args) {
