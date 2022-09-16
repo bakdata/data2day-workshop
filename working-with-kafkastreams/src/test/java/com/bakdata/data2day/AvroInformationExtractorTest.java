@@ -78,12 +78,12 @@ class AvroInformationExtractorTest {
 
 
     @Test
-    void shouldNotExtractWithCorporateDataInProto() throws IOException {
+    void shouldNotExtractWithCorporateDataInAvro() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
 
         this.testTopology.input()
-            .withSerde(Serdes.String(), Serdes.String())
-            .add("1", fixture);
+                .withSerde(Serdes.String(), Serdes.String())
+                .add("1", fixture);
 
         this.testTopology.streamOutput(this.app.getCorporateTopic()).expectNoMoreRecord();
     }
