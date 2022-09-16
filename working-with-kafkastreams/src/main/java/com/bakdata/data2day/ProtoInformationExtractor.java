@@ -1,11 +1,10 @@
 package com.bakdata.data2day;
 
 import com.bakdata.data2day.extractor.JsonExtractor;
-import com.bakdata.data2day.model.CorporatePojo;
-import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
+import com.bakdata.rb.proto.corporate.v1.ProtoCorporate;
+import com.bakdata.rb.proto.person.v1.ProtoPerson;
 import io.confluent.kafka.streams.serdes.protobuf.KafkaProtobufSerde;
-import java.util.Optional;
 import java.util.Properties;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -20,37 +19,37 @@ import picocli.CommandLine;
 public class ProtoInformationExtractor extends KafkaStreamsApplication {
 
     @CommandLine.Option(names = "--throw-exception",
-        description = "If the streams app should only log errors or throw an exception.")
-    private boolean shouldThrowException = false;
+            description = "If the streams app should only log errors or throw an exception.")
+    private final boolean shouldThrowException = false;
 
     @Override
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
-            builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
+                builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
 
         final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
-        final String corporateTopic = this.getOutputTopic("corporate");
+        // extract corporates here
+        final KStream<String, ProtoCorporate> corporates = null;
+        corporates.to(this.getCorporateTopic());
 
-        input.mapValues(jsonExtractor::extractCorporate)
-            .filter(((key, value) -> value.isPresent()))
-            .mapValues(Optional::get)
-            .selectKey((key, value) -> value.getId())
-            .mapValues(CorporatePojo::toProto)
-            .to(corporateTopic);
-
-        final String personTopic = this.getOutputTopic("person");
-
-        input.flatMapValues(jsonExtractor::extractPerson)
-            .selectKey((key, value) -> value.getId())
-            .mapValues(PersonPojo::toProto)
-            .to(personTopic);
+        // extract persons here
+        final KStream<String, ProtoPerson> persons = null;
+        persons.to(this.getPersonTopic());
     }
 
     @Override
     public String getUniqueAppId() {
-        return String.format("proto-corporate-information-extractor-%s-%s", this.getOutputTopic("corporate"),
-                this.getOutputTopic("person"));
+        return String.format("proto-corporate-information-extractor-%s-%s", this.getCorporateTopic(),
+                this.getPersonTopic());
+    }
+
+    String getCorporateTopic() {
+        return this.getOutputTopic("corporate");
+    }
+
+    String getPersonTopic() {
+        return this.getOutputTopic("person");
     }
 
     @Override
