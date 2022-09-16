@@ -11,7 +11,7 @@
 
 ## Docker
 
-`./gradlew jibDockerBuild -Djib.container.mainClass=com.bakdata.data2day.AvroInformationExtractor`
+`./gradlew jibDockerBuild --image avro-converter -Djib.container.mainClass=com.bakdata.data2day.AvroInformationExtractor`
 
 ## Kubernetes
 
@@ -19,4 +19,12 @@
 helm repo add bakdata-common https://raw.githubusercontent.com/bakdata/streams-bootstrap/2.3.0/charts/
 helm repo update
 helm upgrade --install --values values-avro.yaml avro-converter bakdata-common/streams-app
+```
+
+## Kafka
+
+```
+kafka-topics --bootstrap-server k8kafka-cp-kafka-headless:9092 --create --partitions 10 --topic announcement-errors
+kafka-topics --bootstrap-server k8kafka-cp-kafka-headless:9092 --create --partitions 10 --topic avro-corporate
+kafka-topics --bootstrap-server k8kafka-cp-kafka-headless:9092 --create --partitions 10 --topic avro-person
 ```

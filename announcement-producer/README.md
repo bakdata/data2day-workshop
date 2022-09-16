@@ -8,7 +8,7 @@ To run and produce announcements into a Kafka topic, following these steps:
 
 ## Docker
 
-`docker build .`
+`docker build . -t announcement-producer`
 
 ## Kubernetes
 
