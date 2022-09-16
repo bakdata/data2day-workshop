@@ -49,13 +49,6 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-avro {
-    setGettersReturnOptional(true)
-    setOptionalGettersForNullableFieldsOnly(true)
-    setFieldVisibility("PRIVATE")
-}
-
-
 val brokersArg = "--brokers=localhost:29092"
 val schemaRegistryArg = "--schema-registry-url=http://localhost:8081"
 val inputTopicArg = "--input-topics=announcements"
