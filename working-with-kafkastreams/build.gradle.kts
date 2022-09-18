@@ -71,7 +71,7 @@ tasks.register<JavaExec>("runProtoInformationExtractor") {
             brokersArg,
             schemaRegistryArg,
             inputTopicArg,
-            "--extra-output-topics=corporate=avro-corporate",
-            "--extra-output-topics=person=avro-person"
+            "--extra-output-topics=corporate=proto-corporate",
+            "--extra-output-topics=person=proto-person"
     ))
 }

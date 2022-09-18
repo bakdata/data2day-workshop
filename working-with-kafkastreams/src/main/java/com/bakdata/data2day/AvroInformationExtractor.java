@@ -1,10 +1,13 @@
 package com.bakdata.data2day;
 
 import com.bakdata.data2day.extractor.JsonExtractor;
+import com.bakdata.data2day.model.CorporatePojo;
+import com.bakdata.data2day.model.PersonPojo;
 import com.bakdata.kafka.KafkaStreamsApplication;
 import com.bakdata.rb.avro.corporate.v1.AvroCorporate;
 import com.bakdata.rb.avro.person.v1.AvroPerson;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import java.util.Optional;
 import java.util.Properties;
 import lombok.Setter;
 import org.apache.kafka.common.serialization.Serdes;
@@ -21,7 +24,7 @@ import picocli.CommandLine;
 public class AvroInformationExtractor extends KafkaStreamsApplication {
 
     @CommandLine.Option(names = "--throw-exception",
-            description = "If the streams app should only log errors or throw an exception.", arity = "0..1")
+        description = "If the streams app should only log errors or throw an exception.", arity = "0..1")
     private boolean shouldThrowException;
 
     public static void main(final String... args) {
@@ -31,20 +34,26 @@ public class AvroInformationExtractor extends KafkaStreamsApplication {
     @Override
     public void buildTopology(final StreamsBuilder builder) {
         final KStream<String, String> input =
-                builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
+            builder.stream(this.getInputTopics(), Consumed.with(null, Serdes.String()));
         final JsonExtractor jsonExtractor = new JsonExtractor(this.shouldThrowException);
 
-        final KStream<String, AvroCorporate> corporates = null; //TODO extract corporates here
+        final KStream<String, AvroCorporate> corporates = input.mapValues(jsonExtractor::extractCorporate)
+            .filter(((key, value) -> value.isPresent()))
+            .mapValues(Optional::get)
+            .selectKey((key, value) -> value.getId())
+            .mapValues(CorporatePojo::toAvro);
         corporates.to(this.getCorporateTopic());
 
-        final KStream<String, AvroPerson> persons = null; //TODO extract persons here
+        final KStream<String, AvroPerson> persons = input.flatMapValues(jsonExtractor::extractPerson)
+            .selectKey((key, value) -> value.getId())
+            .mapValues(PersonPojo::toAvro);
         persons.to(this.getPersonTopic());
     }
 
     @Override
     public String getUniqueAppId() {
         return String.format("avro-corporate-information-extractor-%s-%s", this.getCorporateTopic(),
-                this.getPersonTopic());
+            this.getPersonTopic());
     }
 
     @Override
