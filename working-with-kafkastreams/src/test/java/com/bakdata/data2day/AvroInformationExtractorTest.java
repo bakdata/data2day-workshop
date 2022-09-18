@@ -48,7 +48,7 @@ class AvroInformationExtractorTest {
         final AvroCorporate corporate =
             jsonExtractor.extractCorporate(fixture).orElseThrow(RuntimeException::new).toAvro();
 
-        this.testTopology.streamOutput(this.app.getOutputTopic("corporate"))
+        this.testTopology.streamOutput(this.app.getCorporateTopic())
             .expectNextRecord()
             .hasKey(corporate.getId())
             .hasValue(corporate)
@@ -67,7 +67,7 @@ class AvroInformationExtractorTest {
             .withValueSerde(Serdes.String())
             .add("1", fixture);
 
-        this.testTopology.streamOutput(this.app.getOutputTopic("person"))
+        this.testTopology.streamOutput(this.app.getPersonTopic())
             .expectNextRecord()
             .hasKey(person.get(0).getId())
             .hasValue(person.get(0))
@@ -78,13 +78,13 @@ class AvroInformationExtractorTest {
 
 
     @Test
-    void shouldNotExtractWithCorporateDataInProto() throws IOException {
+    void shouldNotExtractWithCorporateDataInAvro() throws IOException {
         final String fixture = Resources.toString(Resources.getResource("exception_test.json"), Charsets.UTF_8);
 
         this.testTopology.input()
-            .withSerde(Serdes.String(), Serdes.String())
-            .add("1", fixture);
+                .withSerde(Serdes.String(), Serdes.String())
+                .add("1", fixture);
 
-        this.testTopology.streamOutput(this.app.getOutputTopic("corporate")).expectNoMoreRecord();
+        this.testTopology.streamOutput(this.app.getCorporateTopic()).expectNoMoreRecord();
     }
 }
