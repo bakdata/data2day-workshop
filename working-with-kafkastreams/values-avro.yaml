@@ -12,7 +12,7 @@ streams:
   errorTopic: "announcement-errors"
 
 commandLine:
-  THROW_EXCEPTION: true
+  THROW_EXCEPTION: false
 
 autoscaling:
   consumergroup: avro-corporate-information-extractor-avro-corporate-avro-person
